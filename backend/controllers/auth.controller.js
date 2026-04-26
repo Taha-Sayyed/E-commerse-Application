@@ -2,9 +2,7 @@ import {redis} from "../lib/redis.js"
 import User from "../models/user.model.js"
 import jwt from "jsonwebtoken"
 import {ENV} from "../lib/env.js"
-import {decodeRefreshToken,getRefreshTokenFromDB,storeRefreshToken,createAccessToken} from "../service/auth.service.js"
-
-
+import {decodeRefreshToken,getRefreshTokenFromDB,storeRefreshToken,createAccessToken,refreshAccessTokenService} from "../service/auth.service.js"
 
 
 const setCookies=(res,accessToken,refreshToken)=>{
@@ -40,37 +38,52 @@ const setCookies=(res,accessToken,refreshToken)=>{
 
 //This will refresh the access Token
 
-export const refreshToken=async(req,res)=>{
+export const refreshToken = async (req, res) => {
     try {
-        const refreshToken=req.cookies.refreshToken;
+        const refreshTokenFromCookie = req.cookies.refreshToken;
 
-        if(!refreshToken){
-            return res.status(401).json({
-                message:"No refresh Token provided"
-            })
-        }
+        const { accessToken, refreshToken: newRefreshToken } = await refreshAccessTokenService(refreshTokenFromCookie);
 
-        const decoded=decodeRefreshToken(refreshToken)
-
-        const storedToken=getRefreshTokenFromDB(decoded);
-
-        if(storedToken !=refreshToken){
-            return res.status(401).json({ message: "Invalid refresh token from cookie" });
-        }
-        
-        const accessToken=createAccessToken(decoded.userId,"15m")
-
-        res.cookie("accessToken",accessToken,{
+        // Set both tokens with their respective expiration times
+        res.cookie("accessToken", accessToken, {
             httpOnly: true,
-			secure: ENV.NODE_ENV === "production",
-			sameSite: "strict",
-			maxAge: 15 * 60 * 1000,
-        })
+            secure: ENV.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 15 * 60 * 1000,
+        });
 
-        res.json({ message: "Token refreshed successfully" });
+        res.cookie("refreshToken", newRefreshToken, {
+            httpOnly: true,
+            secure: ENV.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        return res.json({ message: "Token refreshed successfully" });
 
     } catch (error) {
         console.log("Error in refreshToken controller", error.message);
-		res.status(500).json({ message: "Server error", error: error.message });
+
+        // Handle errors cleanly
+        if (error.message === "NO_TOKEN") {
+            return res.status(401).json({ message: "No refresh token provided" });
+        }
+
+        if (error.message === "SESSION_EXPIRED") {
+            return res.status(401).json({ message: "Session expired. Please login again" });
+        }
+
+        if (error.message === "INVALID_TOKEN") {
+            return res.status(401).json({ message: "Invalid refresh token" });
+        }
+
+        if (error.message.includes("TOKEN_EXPIRED")) {
+            return res.status(401).json({ message: "Refresh token expired" });
+        }
+
+        return res.status(500).json({
+            message: "Server error",
+            error: error.message,
+        });
     }
-}
+};

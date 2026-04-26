@@ -9,9 +9,9 @@ export const verifyAccessToken=(token)=>{
     }
     catch(error){
         if(error.name==="TokenExpiredError"){
-            throw new Error("TOKEN_EXPIRED")
+            throw new Error(`TOKEN_EXPIRED: ${error.message}`)
         }
-        throw new Error("INVALID_TOKEN");
+        throw new Error(`INVALID_TOKEN: ${error.message}`);
     }
 };
 
@@ -20,9 +20,9 @@ export const verifyRefreshToken=(token)=>{
         return jwt.verify(token,ENV.REFRESH_TOKEN_SECRET)
     } catch (error) {
         if(error.name==="TokenExpiredError"){
-            throw new Error("TOKEN_EXPIRED")
+            throw new Error(`TOKEN_EXPIRED: ${error.message}`)
         }
-        throw new Error("INVALID_TOKEN");
+        throw new Error(`INVALID_TOKEN: ${error.message}`);
     }
 }
 
@@ -50,7 +50,7 @@ export const getUserFromToken=async (token)=>{
  * 
  */
 export const storeRefreshToken=async (userId,refreshToken)=>{
-    await redis.set(`refresh_token:${userId}`,refreshToken,"EX",7 * 24 * 60 * 60)
+    await redis.set(`refresh_token:${userId}`,refreshToken,"EX",7 * 24 * 60 * 60) //7days
 }
 
 export const decodeRefreshToken=(refreshToken)=>{
@@ -58,16 +58,22 @@ export const decodeRefreshToken=(refreshToken)=>{
         const decodedToken=verifyRefreshToken(refreshToken)
         return decodedToken
     } catch (error) {
-        throw new Error("Failed to Decode Refresh Token")
+        throw error
     }
 }
 
 export const getRefreshTokenFromDB=async(decoded)=>{
     try{
         const refreshToken=await redis.get(`refresh_token:${decoded.userId}`)
-        return refreshToken;
+
+        if(refreshToken){
+            return refreshToken
+        }else{
+            console.log("Redis returns null");
+            return null
+        }
     }catch(error){
-        throw new Error("Failed to fetch Refresh Token from Redis"); 
+        throw new Error(`Failed to fetch Refresh Token from Redis: ${error.message}`);
     }
     
 }
@@ -77,9 +83,42 @@ export const getRefreshTokenFromDB=async(decoded)=>{
  */
 export const createAccessToken=(userIdParam,TTL)=>{
     const accessToken=jwt.sign({userId:userIdParam},ENV.ACCESS_TOKEN_SECRET,{expiresIn:TTL});
+    return accessToken;
 }
 
 export const createRefreshToken=(userIdParam,TTL)=>{
-    const refreshToken=jwt.sign({userId:userIdParam},ENV.ACCESS_TOKEN_SECRET,{expiresIn:TTL});
+    const refreshToken=jwt.sign({userId:userIdParam},ENV.REFRESH_TOKEN_SECRET,{expiresIn:TTL});
+    return refreshToken;
 }
 
+export const refreshAccessTokenService = async (refreshTokenFromCookie) => {
+    // 1. Check token exists
+    if (!refreshTokenFromCookie) {
+        throw new Error("NO_TOKEN");
+    }
+
+    // 2. Decode token
+    const decoded = decodeRefreshToken(refreshTokenFromCookie);
+
+    // 3. Get token from Redis
+    const storedToken = await getRefreshTokenFromDB(decoded);
+
+    // 4. Handle null (session expired)
+    if (!storedToken) {
+        throw new Error("SESSION_EXPIRED");
+    }
+
+    // 5. Validate token match
+    if (storedToken !== refreshTokenFromCookie) {
+        throw new Error("INVALID_TOKEN");
+    }
+
+    // 6. Create new access token
+    const accessToken = createAccessToken(decoded.userId, "15m");
+
+    // 7. Rotate refresh token for security
+    const newRefreshToken = createRefreshToken(decoded.userId, "7d");
+    await storeRefreshToken(decoded.userId, newRefreshToken);
+
+    return { accessToken, refreshToken: newRefreshToken };
+};

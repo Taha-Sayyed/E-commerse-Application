@@ -57,7 +57,7 @@ userSchema.pre("save",async function(next){
 /**
  * This line creates a method that checks if a given plain password matches the user’s hashed password stored in the database.
  */
-userSchema.method.comparePassword=async function (password){
+userSchema.methods.comparePassword=async function (password){
     return bcrypt.compare(password, this.password);
 }
 
