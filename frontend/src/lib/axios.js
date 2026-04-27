@@ -1,6 +1,4 @@
 import axios from "axios";
-import { logout } from '../features/auth/authSlice.js'
-import store from '../stores/store.js'
 
 const axiosInstance = axios.create({
 	baseURL: import.meta.mode === "development" ? "http://localhost:5000/api" : "/api",
@@ -43,6 +41,8 @@ axiosInstance.interceptors.response.use(
 
 				if (!isLoggingOut) {
 					isLoggingOut = true;
+					const { logout } = await import('../features/auth/authSlice.js');
+					const store = (await import('../stores/store.js')).default;
 					store.dispatch(logout()).finally(() => { isLoggingOut = false; });
 				}
 
