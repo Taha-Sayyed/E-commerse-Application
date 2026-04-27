@@ -1,5 +1,4 @@
 import axios from "axios";
-import { refreshTokenService } from '../service/auth.service.js'
 import { logout } from '../features/auth/authSlice.js'
 import store from '../stores/store.js'
 
@@ -10,6 +9,7 @@ const axiosInstance = axios.create({
 
 //shared promise to prevent multiple refresh call
 let refreshPromise = null
+let isLoggingOut = false
 
 axiosInstance.interceptors.response.use(
 	(response) => response,
@@ -31,7 +31,7 @@ axiosInstance.interceptors.response.use(
 				}
 
 				// start refresh
-				refreshPromise = refreshTokenService();
+				refreshPromise = axiosInstance.post("/auth/refresh-token");
 				await refreshPromise;
 				refreshPromise = null;
 
@@ -41,7 +41,10 @@ axiosInstance.interceptors.response.use(
 			} catch (refreshError) {
 				refreshPromise = null;
 
-				store.dispatch(logout())
+				if (!isLoggingOut) {
+					isLoggingOut = true;
+					store.dispatch(logout()).finally(() => { isLoggingOut = false; });
+				}
 
 				return Promise.reject(refreshError);
 			}
