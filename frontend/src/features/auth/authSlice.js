@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { signupService, loginService, logoutService } from '../../service/auth.service.js'
+import { signupService, loginService, logoutService, getProfile, refreshTokenService } from '../../service/auth.service.js'
 
 export const signup = createAsyncThunk(
     "auth/signup",
@@ -33,10 +33,36 @@ export const login = createAsyncThunk(
 
 export const logout = createAsyncThunk(
     "auth/logout",
-    async ({ }, { rejectWithValue }) => {
+    async (_, { rejectWithValue }) => {
         try {
             await logoutService();
             return true;
+        } catch (error) {
+            return rejectWithValue(
+                error?.response?.data?.message || "An error occurred"
+            );
+        }
+    }
+)
+
+export const checkAuth = createAsyncThunk(
+    "auth/checkAuth",
+    async (_, { rejectWithValue }) => {
+        try {
+            return await getProfile()
+        } catch (error) {
+            return rejectWithValue(
+                error?.response?.data?.message || "An error occurred"
+            );
+        }
+    }
+)
+
+export const refreshToken = createAsyncThunk(
+    "auth/refreshToken",
+    async (_, { rejectWithValue }) => {
+        try {
+            return await refreshTokenService()
         } catch (error) {
             return rejectWithValue(
                 error?.response?.data?.message || "An error occurred"
@@ -87,6 +113,27 @@ const authSlice = createSlice({
             })
             .addCase(logout.rejected, (state) => {
                 state.loading = false;
+            })
+            .addCase(checkAuth.pending, (state) => {
+                state.checkingAuth = true
+            })
+            .addCase(checkAuth.fulfilled, (state, action) => {
+                state.user = action.payload
+                state.checkingAuth = false
+            })
+            .addCase(checkAuth.rejected, (state) => {
+                state.user = null
+                state.checkingAuth = false
+            })
+            .addCase(refreshToken.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(refreshToken.fulfilled, (state) => {
+                state.loading = false;
+            })
+            .addCase(refreshToken.rejected, (state) => {
+                state.loading = false;
+                state.user = null;
             })
 
     }
