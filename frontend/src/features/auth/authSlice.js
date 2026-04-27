@@ -1,8 +1,22 @@
 import {createSlice} from '@reduxjs/toolkit'
 
-const initialState={}
+const initialState={
+    user:null,
+    loading:false,
+    checkingAuth:true
+}
 
-const authSlice=createSlice({})
+const authSlice=createSlice({
+    name:"auth",
+    initialState,
+    reducers:{
+        signup:(state,action)=>{},
+        login:(state,action)=>{},
+        logout:(state,action)=>{},
+        checkAuth:(state,action)=>{},
+        refreshToken:(state,action)=>{}
+    }
+})
 
 
 
