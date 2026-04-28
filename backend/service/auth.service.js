@@ -130,6 +130,10 @@ export const createNewUser = async (name, email, password) => {
     try {
         return await User.create({ name, email, password });
     } catch (error) {
+        if(error.message==="User validation failed: password: Password must be at least 6 characters long"){
+
+            throw new AppError("Password must be at least 6 characters long", 500);
+        }
         throw new AppError("Failed to create user", 500);
     }
 }
