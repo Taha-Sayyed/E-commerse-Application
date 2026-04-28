@@ -1,5 +1,5 @@
 import { AppError } from "../lib/appError.js"
-import { getAllProductsFromDB, getAllProductsFromRedis, getFeaturedProductsFromDB, storeFeaturedProductsOnRedis } from "../service/product.service.js"
+import { getAllProductsFromDB, getAllProductsFromRedis, getFeaturedProductsFromDB, storeFeaturedProductsOnRedis, getProductsByCategoryFromDB, getProductsSampleFromDB, uploadImagesToStore, setProducts } from "../service/product.service.js"
 
 export const getAllProducts = async (req, res) => {
     try {
@@ -38,4 +38,48 @@ export const getFeaturedProducts = async (req, res) => {
         return res.status(500).json({ message: "Server error" });
     }
 
-}   
+}
+
+export const getProductsByCategory = async (req, res) => {
+    const { category } = req.params;
+
+    try {
+        const products = await getProductsByCategoryFromDB(category);
+        res.json({ products });
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+
+export const getRecommendedProducts = async (req, res) => {
+    try {
+        const products = await getProductsSampleFromDB(4);
+        res.json(products)
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+
+export const createProduct = async (req, res) => {
+    try {
+        const { name, description, price, image, category } = req.body;
+        if (!name || !description || !price || !category) {
+            return res.status(400).json({ message: "Missing required fields: name, description, price, category" });
+        }
+        const product = await setProducts(name, description, price, image, category)
+        res.status(201).json(product)
+    }
+    catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        return res.status(500).json({ message: "Server error" });
+        // return res.status(500).json({ message: error.message });
+    }
+}
