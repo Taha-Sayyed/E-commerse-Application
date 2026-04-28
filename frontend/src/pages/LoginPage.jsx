@@ -16,8 +16,6 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // console.log(email,password);
-    // dispatch(login({email, password}));
     try {
       await dispatch(login({ email, password })).unwrap();
       toast.success("Login successful");

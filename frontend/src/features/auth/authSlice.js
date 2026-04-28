@@ -3,7 +3,7 @@ import { signupService, loginService, logoutService, getProfile, refreshTokenSer
 
 export const signup = createAsyncThunk(
     "auth/signup",
-    async ({ name, email, password, confirmPassword }, { rejectWithValue }) => {
+    async ({ name, email, password, confirmPassword }, { rejectWithValue }) => {        
         if (password !== confirmPassword) {
             return rejectWithValue("Password do not match");
         }

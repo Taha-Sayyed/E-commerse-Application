@@ -1,6 +1,7 @@
 import axios from "../lib/axios";
 
 export const signupService = async ({ name, email, password }) => {
+    
     const res = await axios.post("/auth/signup", { name, email, password });
 
     return res.data
