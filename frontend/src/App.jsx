@@ -15,8 +15,8 @@ import { Toaster } from "react-hot-toast";
 
 function App() {
 
-  const user = useSelector((state) => state.user)
-  const checkingAuth = useSelector((state) => state.checkingAuth)
+  const user = useSelector((state) => state.auth.user)
+  const checkingAuth = useSelector((state) => state.auth.checkingAuth)
 
   useEffect(() => {
     checkAuth()
@@ -31,7 +31,7 @@ function App() {
    * 
    */
 
-  if (checkingAuth) return <LoadingSpinner />
+  // if (checkingAuth) return <LoadingSpinner />
 
   return (
     <div className='min-h-screen bg-gray-900 text-white relative overflow-hidden'>
