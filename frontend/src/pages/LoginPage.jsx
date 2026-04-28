@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { LogIn, Mail, Lock, ArrowRight, Loader } from "lucide-react";
 import { useSelector, useDispatch } from 'react-redux'
 import { login } from '../features/auth/authSlice.js'
+import { toast } from 'react-hot-toast'
 
 function LoginPage() {
 
@@ -13,10 +14,16 @@ function LoginPage() {
   const loading = useSelector(state => state.auth.loading)
   const dispatch = useDispatch()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // console.log(email,password);
-    dispatch(login({email, password}));
+    // dispatch(login({email, password}));
+    try {
+      await dispatch(login({ email, password })).unwrap();
+      toast.success("Login successful");
+    } catch (error) {
+      toast.error("Invalid email or password");
+    }
   }
 
   return (
