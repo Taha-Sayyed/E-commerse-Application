@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser'
 import path from "path"
 import dns from "node:dns/promises";
 import authRoutes from './routes/auth.route.js'
+import cors from "cors";
 dns.setServers(["1.1.1.1"]);
 
 const app = express();
@@ -19,6 +20,11 @@ app.use(express.json()); // allows you to parse the body of the request
  * And adds them to req.cookies
  */
 app.use(cookieParser());
+
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}));
 
 //Routes
 app.use("/api/auth", authRoutes);
