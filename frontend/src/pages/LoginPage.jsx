@@ -10,13 +10,13 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const loading = useSelector(state => state.loading)
+  const loading = useSelector(state => state.auth.loading)
   const dispatch = useDispatch()
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // console.log(email,password);
-    dispatch(login(email, password));
+    dispatch(login({email, password}));
   }
 
   return (
