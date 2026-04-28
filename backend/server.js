@@ -7,6 +7,7 @@ import path from "path"
 import dns from "node:dns/promises";
 import authRoutes from './routes/auth.route.js'
 import cors from "cors";
+import productRoutes from "./routes/product.route.js"
 dns.setServers(["1.1.1.1"]);
 
 const app = express();
@@ -28,6 +29,7 @@ app.use(cors({
 
 //Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/products",productRoutes)
 
 
 app.get("/api/health", (req, res) => {
