@@ -104,7 +104,50 @@ export const setProducts = async (name, description, price, image, category) => 
         if (error instanceof AppError) {
             throw error;
         }
-        throw new AppError("Failed to create Products",500);
+        throw new AppError("Failed to create Products", 500);
         // throw new AppError(error.message,500);
+    }
+}
+
+export const updateFeaturedProductsCache = async () => {
+    try {
+        const featuredProducts = await getFeaturedProductsFromDB();
+        await storeFeaturedProductsOnRedis("featured_products", featuredProducts);
+    } catch (error) {
+        throw new AppError("Failed to update featured products cache", 500);
+    }
+}
+
+export const getProductByIdFromDB = async (_id) => {
+    try {
+        const product = await Product.findById(_id);
+        return product;
+    } catch (error) {
+        throw new AppError("Failed to get Products By ID from DB", 500);
+    }
+}
+
+export const saveProductToDB = async (product) => {
+    try {
+        const response = await product.save();
+        return response
+    } catch (error) {
+        throw new AppError("Failed to save product to DB", 500);
+    }
+}
+
+export const deleteImageFromStore = async (publicId) => {
+    try {
+        await cloudinary.uploader.destroy(`products/${publicId}`)
+    } catch (error) {
+        throw new AppError("Failed to delete product from store", 500);
+    }
+}
+
+export const deleteProductByID = async (id) => {
+    try {
+        await Product.findByIdAndDelete(id);
+    } catch (error) {
+        throw new AppError("Failed to delete product by ID", 500);
     }
 }

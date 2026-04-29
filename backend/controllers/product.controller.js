@@ -1,5 +1,5 @@
 import { AppError } from "../lib/appError.js"
-import { getAllProductsFromDB, getAllProductsFromRedis, getFeaturedProductsFromDB, storeFeaturedProductsOnRedis, getProductsByCategoryFromDB, getProductsSampleFromDB, uploadImagesToStore, setProducts } from "../service/product.service.js"
+import { getAllProductsFromDB, getAllProductsFromRedis, getFeaturedProductsFromDB, storeFeaturedProductsOnRedis, getProductsByCategoryFromDB, getProductsSampleFromDB, uploadImagesToStore, setProducts, getProductByIdFromDB, saveProductToDB, updateFeaturedProductsCache, deleteImageFromStore, deleteProductByID } from "../service/product.service.js"
 
 export const getAllProducts = async (req, res) => {
     try {
@@ -81,5 +81,55 @@ export const createProduct = async (req, res) => {
         }
         return res.status(500).json({ message: "Server error" });
         // return res.status(500).json({ message: error.message });
+    }
+}
+
+export const toggleFeaturedProduct = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const product = await getProductByIdFromDB(id);
+
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        product.isFeatured = !product.isFeatured;
+        const updatedProduct = await saveProductToDB(product);
+        await updateFeaturedProductsCache();
+        res.json(updatedProduct)
+
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+
+export const deleteProduct = async (req, res) => {
+    try {
+        const id = req.params.id
+        const product = await getProductByIdFromDB(id)
+
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        if (product.image) {
+            const publicId = product.image.split("/").pop().split(".")[0];
+            try {
+                await deleteImageFromStore(publicId);
+                await deleteProductByID(id)
+                res.json({ message: "Product deleted successfully" });
+            } catch (error) {
+                res.json({ message: error.message });
+            }
+        }
+
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        return res.status(500).json({ message: "Server error" });
     }
 }
