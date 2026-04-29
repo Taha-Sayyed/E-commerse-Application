@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { postProductDataService } from '../../service/product.service.js'
+import { addProduct, getAllProducts } from '../../service/product.service.js'
 
 const initialState = {
     products: [],
@@ -10,7 +10,7 @@ export const createProduct = createAsyncThunk(
     "product/createProduct",
     async (productData, { rejectWithValue }) => {
         try {
-            return await postProductDataService(productData)
+            return await addProduct(productData)
 
         } catch (error) {
             return rejectWithValue(
@@ -18,6 +18,20 @@ export const createProduct = createAsyncThunk(
             );
         }
     }
+)
+
+export const fetchAllProducts = createAsyncThunk(
+    "product/fetchAllProducts",
+    async (_, { rejectWithValue }) => {
+        try {
+            return await getAllProducts()
+        } catch (error) {
+            return rejectWithValue(
+                error?.response?.data?.message || "An error occurred"
+            );
+        }
+    }
+
 )
 
 const productSlice = createSlice({
@@ -38,6 +52,16 @@ const productSlice = createSlice({
                 state.loading = false
             })
             .addCase(createProduct.rejected, (state) => {
+                state.loading = false
+            })
+            .addCase(fetchAllProducts.pending, (state) => {
+                state.loading = true
+            })
+            .addCase(fetchAllProducts.fulfilled, (state, action) => {
+                state.products = action.payload
+                state.loading = false
+            })
+            .addCase(fetchAllProducts.rejected, (state) => {
                 state.loading = false
             })
     }
