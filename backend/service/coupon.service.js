@@ -30,8 +30,8 @@ export const validateCouponService = async (user_id, code) => {
 
 export const saveCoupon = async (coupon) => {
     try {
-        await coupon.save();
+        return await coupon.save();
     } catch (error) {
-        throw new AppError("Failed to save coupon for user", 500);
+        throw new AppError("Failed to save coupon", 500);
     }
 }
