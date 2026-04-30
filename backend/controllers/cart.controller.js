@@ -1,4 +1,3 @@
-import Product from "../models/product.model.js"
 import { getCartProductsService, addToCartService, saveUserToDB } from "../service/cart.service.js"
 import { AppError } from '../lib/appError.js'
 
