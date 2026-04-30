@@ -1,4 +1,5 @@
 import Coupon from "../models/coupon.model.js"
+import Order from "../models/orders.model.js"
 import { saveCoupon } from "./coupon.service.js"
 import { AppError } from "../lib/appError.js"
 import { stripe } from "../lib/stripe.js"
@@ -69,29 +70,85 @@ export const createStripeCoupon = async (discountPercentage) => {
 }
 
 export const createStripeCheckoutSessionService = async (lineItems, userId, coupon, couponCode, products) => {
-    return await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        line_items: lineItems,
-        mode: "payment",
-        success_url: `${ENV.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${ENV.CLIENT_URL}/purchase-cancel`,
-        discounts: coupon
-            ? [
-                {
-                    coupon: await createStripeCoupon(coupon.discountPercentage),
-                },
-            ]
-            : [],
-        metadata: {
-            userId: userId.toString(),
-            couponCode: couponCode || "",
-            products: JSON.stringify(
-                products.map((p) => ({
-                    id: p._id,
-                    quantity: p.quantity,
-                    price: p.price,
-                }))
-            ),
-        },
-    });
+    try {
+        return await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            line_items: lineItems,
+            mode: "payment",
+            success_url: `${ENV.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${ENV.CLIENT_URL}/purchase-cancel`,
+            discounts: coupon
+                ? [
+                    {
+                        coupon: await createStripeCoupon(coupon.discountPercentage),
+                    },
+                ]
+                : [],
+            metadata: {
+                userId: userId.toString(),
+                couponCode: couponCode || "",
+                products: JSON.stringify(
+                    products.map((p) => ({
+                        id: p._id,
+                        quantity: p.quantity,
+                        price: p.price,
+                    }))
+                ),
+            },
+        });
+    } catch (error) {
+        // throw new AppError("Failed to create stripe checkout session", 500)
+        throw new AppError(error.message, 500)
+    }
+
+}
+
+export const retrieveStripeCheckoutSession = async (sessionId) => {
+    try {
+        return await stripe.checkout.sessions.retrieve(sessionId)
+    } catch (error) {
+        throw new AppError("Failed to retrieve stripe checkout session", 500)
+    }
+}
+
+export const updateCoupon = async (code, userId) => {
+    try {
+        await Coupon.findOneAndUpdate(
+            {
+                code: code,
+                userId: userId,
+            },
+            {
+                isActive: false,
+            }
+        )
+    } catch (error) {
+        throw new AppError("Failed to update Coupon", 500)
+    }
+}
+
+export const createNewOrder = async (user, products, totalAmount, sessionId) => {
+    try {
+        const newOrder = new Order({
+            user: user,
+            products: products.map((product) => ({
+                product: product.id,
+                quantity: product.quantity,
+                price: product.price,
+            })),
+            totalAmount: totalAmount,
+            stripeSessionId: sessionId,
+        });
+        return newOrder;
+    } catch (error) {
+        throw new AppError("Failed to create new order", 500)
+    }
+}
+
+export const saveNewOrder = async (newOrder) => {
+    try {
+        await newOrder.save();
+    } catch (error) {
+        throw new AppError("Failed to save new order", 500)
+    }
 }
