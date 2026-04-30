@@ -50,11 +50,10 @@ export const addToCartService = async (productId, user) => {
         return user.cartItems;
 
     } catch (error) {
-        // throw new AppError("Failed to add product in Cart", 500);
-        throw new AppError(error.message, 500);
+        throw new AppError("Failed to add product in Cart", 500);
+        // throw new AppError(error.message, 500);
     }
 
 }
-
 
 
