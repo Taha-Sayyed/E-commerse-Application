@@ -2,6 +2,7 @@ import Coupon from "../models/coupon.model.js"
 import { saveCoupon } from "./coupon.service.js"
 import { AppError } from "../lib/appError.js"
 import { stripe } from "../lib/stripe.js"
+import { ENV } from "../lib/env.js"
 
 export const deletePreviousCoupon = async (userId) => {
     if (!userId) {
@@ -65,4 +66,32 @@ export const createStripeCoupon = async (discountPercentage) => {
     } catch (error) {
         throw new AppError(`Failed to create Stripe coupon: ${error.message}`, 500);
     }
+}
+
+export const createStripeCheckoutSessionService = async (lineItems, userId, coupon, couponCode, products) => {
+    return await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: lineItems,
+        mode: "payment",
+        success_url: `${ENV.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${ENV.CLIENT_URL}/purchase-cancel`,
+        discounts: coupon
+            ? [
+                {
+                    coupon: await createStripeCoupon(coupon.discountPercentage),
+                },
+            ]
+            : [],
+        metadata: {
+            userId: userId.toString(),
+            couponCode: couponCode || "",
+            products: JSON.stringify(
+                products.map((p) => ({
+                    id: p._id,
+                    quantity: p.quantity,
+                    price: p.price,
+                }))
+            ),
+        },
+    });
 }
