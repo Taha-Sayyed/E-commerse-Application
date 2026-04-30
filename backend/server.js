@@ -9,6 +9,7 @@ import authRoutes from './routes/auth.route.js'
 import cors from "cors";
 import productRoutes from "./routes/product.route.js"
 import cartRoutes from "./routes/cart.route.js"
+import couponRoutes from "./routes/coupon.route.js"
 dns.setServers(["1.1.1.1"]);
 
 const app = express();
@@ -32,6 +33,7 @@ app.use(cors({
 app.use("/api/auth", authRoutes);
 app.use("/api/products",productRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/coupons", couponRoutes);
 
 
 app.get("/api/health", (req, res) => {
