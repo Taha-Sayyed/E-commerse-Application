@@ -33,5 +33,6 @@ export const saveCoupon = async (coupon) => {
         return await coupon.save();
     } catch (error) {
         throw new AppError("Failed to save coupon", 500);
+        // throw new AppError(`${error.message}`, 500);
     }
 }
