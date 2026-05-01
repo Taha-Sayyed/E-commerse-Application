@@ -46,7 +46,7 @@ function FeaturedProducts({ featuredProducts = [] }) {
       await dispatch(addToCart(product)).unwrap()
       toast.success("Item added to Cart successfully")
     } catch (error) {
-      toast.error("Failed to add to cart")
+      toast.error("Need to Login")
     }
   }
 
