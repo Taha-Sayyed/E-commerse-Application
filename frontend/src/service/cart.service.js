@@ -39,3 +39,8 @@ export const deleteFromCart = async (productId) => {
 export const updateProductQuantity = async (productId, quantity) => {
     await axios.put(`/cart/${productId}`, { quantity });
 }
+
+export const fetchRecommendationsService = async () => {
+    const res = await axios.get("/products/recommendations");
+    return res.data;
+}
