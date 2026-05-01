@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { checkAuth } from './features/auth/authSlice.js'
 
 import HomePage from "./pages/HomePage";
@@ -8,19 +8,22 @@ import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import AdminPage from "./pages/AdminPage";
 import CategoryPage from "./pages/CategoryPage";
+import CartPage from "./pages/CartPage.jsx"
+import PurchaseSuccessPage from "./pages/PurchaseSuccessPage.jsx"
+import PurchaseCancelPage from "./pages/PurchaseCancelPage.jsx"
 
 import LoadingSpinner from "./components/LoadingSpinner";
 import Navbar from "./components/Navbar";
 import { Toaster } from "react-hot-toast";
 
 function App() {
-
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user)
   const checkingAuth = useSelector((state) => state.auth.checkingAuth)
 
   useEffect(() => {
-    checkAuth()
-  }, [checkAuth]);
+    dispatch(checkAuth());
+  }, [dispatch]);
 
   /** Pending Work 👈
    * 	useEffect(() => {
@@ -31,7 +34,7 @@ function App() {
    * 
    */
 
-  // if (checkingAuth) return <LoadingSpinner />
+  if (checkingAuth) return <LoadingSpinner />
 
   return (
     <div className='min-h-screen bg-gray-900 text-white relative overflow-hidden'>
