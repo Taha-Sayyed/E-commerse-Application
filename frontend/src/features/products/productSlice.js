@@ -122,7 +122,7 @@ const productSlice = createSlice({
             .addCase(fetchProductsByCategory.pending, (state) => {
                 state.loading = true
             })
-            .addCase(fetchProductsByCategory.fulfilled, (state) => {
+            .addCase(fetchProductsByCategory.fulfilled, (state,action) => {
                 state.products = action.payload.products
                 state.loading = false
             })
