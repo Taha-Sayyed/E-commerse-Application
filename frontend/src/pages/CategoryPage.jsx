@@ -10,7 +10,7 @@ function CategoryPage() {
   const products = useSelector(state => state.product?.products)
   const dispatch = useDispatch()
   const { category } = useParams();
-  console.log("products:", products);
+  // console.log("products:", products);
 
   useEffect(() => {
     dispatch(fetchProductsByCategory(category))
