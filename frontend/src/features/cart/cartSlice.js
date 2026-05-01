@@ -80,7 +80,6 @@ export const removeFromCart = createAsyncThunk(
 export const updateQuantity = createAsyncThunk(
     "cart/updateQuantity",
     async ({ productId, quantity }, { rejectWithValue }) => {
-        console.log(productId);
         try {
             if (quantity === 0) {
                 await deleteFromCart(productId)
