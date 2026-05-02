@@ -7,7 +7,7 @@ export const addProduct = async (productData) => {
 
 export const getAllProducts = async () => {
     const res = await axios.get("/products")
-    return res.data
+    return res.data.data
 }
 
 export const getProductByCategory = async (category) => {
