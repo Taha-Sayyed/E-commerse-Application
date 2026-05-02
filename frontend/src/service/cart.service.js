@@ -14,7 +14,7 @@ export const calculateTotals = (cart, coupon) => {
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
     let total = subtotal;
 
-    if (coupon) {
+    if (coupon && subtotal >= 200) {
         const discount = subtotal * (coupon.discountPercentage / 100);
         total = subtotal - discount;
     }
@@ -38,4 +38,9 @@ export const deleteFromCart = async (productId) => {
 
 export const updateProductQuantity = async (productId, quantity) => {
     await axios.put(`/cart/${productId}`, { quantity });
+}
+
+export const fetchRecommendationsService = async () => {
+    const res = await axios.get("/products/recommendations");
+    return res.data;
 }

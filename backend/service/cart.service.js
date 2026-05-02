@@ -47,11 +47,28 @@ export const addToCartService = async (productId, user) => {
         }
 
         await user.save();
-        return user.cartItems;
+
+        // Return full product data with quantities, not just raw cartItems
+        const validCartItems = user.cartItems.filter(item => item.product);
+        const products = await Product.find({
+            _id: { $in: validCartItems.map(item => item.product) }
+        });
+
+        const cartItems = products.map((product) => {
+            const item = validCartItems.find(
+                (cartItem) => cartItem.product.toString() === product._id.toString()
+            );
+
+            return {
+                ...product.toJSON(),
+                quantity: item.quantity,
+            };
+        });
+
+        return cartItems;
 
     } catch (error) {
         throw new AppError("Failed to add product in Cart", 500);
-        // throw new AppError(error.message, 500);
     }
 
 }

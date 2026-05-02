@@ -6,7 +6,8 @@ export const getCouponService = async (user_id) => {
     try {
         const coupon = await Coupon.findOne({
             userId: user_id,
-            isActive: true
+            isActive: true,
+            expirationDate: { $gt: new Date() }
         })
         return coupon
     } catch (error) {
@@ -19,7 +20,8 @@ export const validateCouponService = async (user_id, code) => {
         const coupon = await Coupon.findOne({
             code: code,
             userId: user_id,
-            isActive: true
+            isActive: true,
+            expirationDate: { $gt: new Date() }
         });        
 
         return coupon;
@@ -33,5 +35,6 @@ export const saveCoupon = async (coupon) => {
         return await coupon.save();
     } catch (error) {
         throw new AppError("Failed to save coupon", 500);
+        // throw new AppError(`${error.message}`, 500);
     }
 }
