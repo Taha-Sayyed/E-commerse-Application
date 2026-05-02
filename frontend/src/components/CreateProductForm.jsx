@@ -28,8 +28,9 @@ function CreateProductForm() {
     try {
       await dispatch(createProduct(newProduct)).unwrap();
       setNewProduct({ name: "", description: "", price: "", category: "", image: "" });
+      toast.success("Product created successfully")
     } catch (error) {
-      toast.error("Error in submitting the form")
+      toast.error(error || "Error in submitting the form")
     }
   }
 

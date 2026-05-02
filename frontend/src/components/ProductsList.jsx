@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 
 function ProductsList() {
 
-  const products = useSelector(state=>state.product?.products.data)
+  const products = useSelector(state=>state.product?.products)
   const dispatch = useDispatch()
 
   const handleToggleFeaturedProduct = async (productId) => {
@@ -21,7 +21,7 @@ function ProductsList() {
       await dispatch(toggleFeaturedProduct(productId)).unwrap();
       toast.success("Product toggled successfully")
     } catch (error) {
-      toast.error("Failed to toggle products")
+      toast.error(error || "Failed to toggle products")
     }
   };
 
@@ -35,7 +35,7 @@ function ProductsList() {
       await dispatch(deleteProduct(productId)).unwrap()
       toast.success("Deleted Successfully")
     } catch (error) { 
-      toast.error("Failed to delete product")
+      toast.error(error || "Failed to delete product")
     }
   }
 
