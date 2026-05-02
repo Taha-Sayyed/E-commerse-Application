@@ -39,7 +39,7 @@ function ProductsList() {
     }
   }
 
-  console.log(products);
+  // console.log(products);
 
 
 
