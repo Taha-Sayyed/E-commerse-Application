@@ -60,6 +60,7 @@ export const getProductsSampleFromDB = async (size) => {
                     description: 1,
                     image: 1,
                     price: 1,
+                    category: 1,
                 },
             },
         ]);
