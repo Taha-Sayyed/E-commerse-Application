@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from "framer-motion";
-import { applyCoupon, getMyCoupon, removeCoupon } from "../features/cart/cartSlice.js"
+import { applyCoupon, getInstantReward, removeCoupon } from "../features/cart/cartSlice.js"
 import { useSelector, useDispatch } from 'react-redux'
 import { toast } from 'react-hot-toast'
 
@@ -15,7 +15,7 @@ function GiftCouponCard() {
 
   useEffect(() => {
     if (!coupon) {
-      dispatch(getMyCoupon());
+      dispatch(getInstantReward());
     }
   }, [dispatch, coupon]);
 

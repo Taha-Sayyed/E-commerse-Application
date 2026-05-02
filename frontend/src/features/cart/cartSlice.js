@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getCoupon, validateCoupon, calculateTotals, getItemFromCart, addProductToCart, deleteFromCart, updateProductQuantity, clearCartService } from '../../service/cart.service.js'
+import { getCoupon, validateCoupon, calculateTotals, getItemFromCart, addProductToCart, deleteFromCart, updateProductQuantity, clearCartService, getInstantRewardService } from '../../service/cart.service.js'
 
 
 
@@ -29,6 +29,19 @@ export const applyCoupon = createAsyncThunk(
     async (code, { rejectWithValue }) => {
         try {
             return await validateCoupon(code)
+        } catch (error) {
+            return rejectWithValue(
+                error?.response?.data?.message || "An error occurred"
+            );
+        }
+    }
+)
+
+export const getInstantReward = createAsyncThunk(
+    "cart/getInstantReward",
+    async (_, { rejectWithValue }) => {
+        try {
+            return await getInstantRewardService();
         } catch (error) {
             return rejectWithValue(
                 error?.response?.data?.message || "An error occurred"
@@ -134,6 +147,9 @@ const cartSlice = createSlice({
                 const { total, subtotal } = calculateTotals(state.cart, state.coupon);
                 state.total = total;
                 state.subtotal = subtotal;
+            })
+            .addCase(getInstantReward.fulfilled, (state, action) => {
+                state.coupon = action.payload;
             })
             .addCase(getCartItems.fulfilled, (state, action) => {
                 state.cart = action.payload

@@ -32,7 +32,10 @@ export const createCheckoutSession = async (req, res) => {
 
         let coupon = null;
 
-        if (couponCode && totalAmount >= 20000) {
+        if (couponCode) {
+            if (totalAmount < 20000) {
+                return res.status(400).json({ error: "Coupons require a minimum purchase of $200." });
+            }
             coupon = await validateCouponService(req.user._id, couponCode);
             if (coupon) {
                 totalAmount -= Math.round((totalAmount * coupon.discountPercentage) / 100);
@@ -41,9 +44,7 @@ export const createCheckoutSession = async (req, res) => {
 
         const session = await createStripeCheckoutSessionService(lineItems, req.user._id, coupon, couponCode, products)
 
-        if (totalAmount >= 20000) {
-            await createNewCoupon(req.user._id);
-        }
+
 
         res.status(200).json({ id: session.id, totalAmount: totalAmount / 100 });
 

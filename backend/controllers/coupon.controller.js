@@ -1,4 +1,5 @@
 import { getCouponService, validateCouponService, saveCoupon } from "../service/coupon.service.js"
+import { createNewCoupon } from "../service/payment.service.js"
 import { AppError } from "../lib/appError.js"
 import Coupon from "../models/coupon.model.js"
 
@@ -49,6 +50,29 @@ export const validateCoupon = async (req, res) => {
             discountPercentage:coupon.discountPercentage
         })
 
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+
+export const getInstantReward = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        
+        // Ensure user doesn't already have an active coupon
+        const existingCoupon = await getCouponService(req.user._id);
+        if (existingCoupon) {
+            return res.json(existingCoupon);
+        }
+
+        // Create a new coupon
+        const newCoupon = await createNewCoupon(req.user._id);
+        res.status(201).json(newCoupon);
     } catch (error) {
         if (error instanceof AppError) {
             return res.status(error.statusCode).json({ message: error.message });
