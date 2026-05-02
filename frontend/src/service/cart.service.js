@@ -14,7 +14,7 @@ export const calculateTotals = (cart, coupon) => {
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
     let total = subtotal;
 
-    if (coupon) {
+    if (coupon && subtotal >= 200) {
         const discount = subtotal * (coupon.discountPercentage / 100);
         total = subtotal - discount;
     }

@@ -18,6 +18,10 @@ export const deletePreviousCoupon = async (userId) => {
 }
 
 export const createNewCoupon = async (userId) => {
+
+    console.log("Function called");
+    
+
     if (!userId) {
         throw new AppError("User ID is required", 400);
     }

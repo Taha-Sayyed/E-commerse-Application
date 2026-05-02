@@ -15,6 +15,7 @@ function CartPage() {
 
   const dispatch = useDispatch()
   const cart = useSelector(state => state.cart?.cart) || [];
+  const subtotal = useSelector(state => state.cart?.subtotal) || 0;
 
   useEffect(() => {
     dispatch(getCartItems())
@@ -50,7 +51,7 @@ function CartPage() {
               transition={{ duration: 0.5, delay: 0.4 }}
             >
               <OrderSummary />
-              <GiftCouponCard />
+              {subtotal >= 200 && <GiftCouponCard />}
             </motion.div>
           )}
         </div>

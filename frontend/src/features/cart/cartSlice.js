@@ -130,8 +130,16 @@ const cartSlice = createSlice({
             .addCase(getCartItems.fulfilled, (state, action) => {
                 state.cart = action.payload
                 const { total, subtotal } = calculateTotals(state.cart, state.coupon)
-                state.total = total;
-                state.subtotal = subtotal;
+                if (subtotal < 200 && state.isCouponApplied) {
+                    state.coupon = null;
+                    state.isCouponApplied = false;
+                    const recalculated = calculateTotals(state.cart, null);
+                    state.total = recalculated.total;
+                    state.subtotal = recalculated.subtotal;
+                } else {
+                    state.total = total;
+                    state.subtotal = subtotal;
+                }
             })
             .addCase(getCartItems.rejected, (state) => {
                 state.cart = []
@@ -139,14 +147,30 @@ const cartSlice = createSlice({
             .addCase(addToCart.fulfilled, (state, action) => {
                 state.cart = action.payload
                 const { total, subtotal } = calculateTotals(state.cart, state.coupon)
-                state.total = total;
-                state.subtotal = subtotal;
+                if (subtotal < 200 && state.isCouponApplied) {
+                    state.coupon = null;
+                    state.isCouponApplied = false;
+                    const recalculated = calculateTotals(state.cart, null);
+                    state.total = recalculated.total;
+                    state.subtotal = recalculated.subtotal;
+                } else {
+                    state.total = total;
+                    state.subtotal = subtotal;
+                }
             })
             .addCase(removeFromCart.fulfilled, (state, action) => {
                 state.cart = state.cart.filter(item => item._id !== action.payload)
                 const { total, subtotal } = calculateTotals(state.cart, state.coupon)
-                state.total = total;
-                state.subtotal = subtotal;
+                if (subtotal < 200 && state.isCouponApplied) {
+                    state.coupon = null;
+                    state.isCouponApplied = false;
+                    const recalculated = calculateTotals(state.cart, null);
+                    state.total = recalculated.total;
+                    state.subtotal = recalculated.subtotal;
+                } else {
+                    state.total = total;
+                    state.subtotal = subtotal;
+                }
             })
             .addCase(updateQuantity.fulfilled, (state, action) => {
                 const { productId, quantity } = action.payload
@@ -157,8 +181,16 @@ const cartSlice = createSlice({
                     if (item) item.quantity = quantity
                 }
                 const { total, subtotal } = calculateTotals(state.cart, state.coupon)
-                state.total = total;
-                state.subtotal = subtotal;
+                if (subtotal < 200 && state.isCouponApplied) {
+                    state.coupon = null;
+                    state.isCouponApplied = false;
+                    const recalculated = calculateTotals(state.cart, null);
+                    state.total = recalculated.total;
+                    state.subtotal = recalculated.subtotal;
+                } else {
+                    state.total = total;
+                    state.subtotal = subtotal;
+                }
             })
 
     }

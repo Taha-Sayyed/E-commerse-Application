@@ -32,7 +32,7 @@ export const createCheckoutSession = async (req, res) => {
 
         let coupon = null;
 
-        if (couponCode) {
+        if (couponCode && totalAmount >= 20000) {
             coupon = await validateCouponService(req.user._id, couponCode);
             if (coupon) {
                 totalAmount -= Math.round((totalAmount * coupon.discountPercentage) / 100);
