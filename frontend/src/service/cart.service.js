@@ -36,6 +36,10 @@ export const deleteFromCart = async (productId) => {
     await axios.delete(`/cart`, { data: { productId } });
 }
 
+export const clearCartService = async () => {
+    await axios.delete("/cart", { data: {} });
+}
+
 export const updateProductQuantity = async (productId, quantity) => {
     await axios.put(`/cart/${productId}`, { quantity });
 }

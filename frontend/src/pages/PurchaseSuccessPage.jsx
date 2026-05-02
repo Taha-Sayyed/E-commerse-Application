@@ -12,15 +12,21 @@ function PurchaseSuccessPage() {
   const [error, setError] = useState(null);
   const dispatch = useDispatch();
 
+  const isCalled = React.useRef(false);
+
   useEffect(() => {
+    if (isCalled.current) return;
+    
     const handleCheckoutSuccess = async (sessionId) => {
+      isCalled.current = true;
       try {
         await axios.post("/payments/checkout-success", {
           sessionId,
         });
         dispatch(clearCart())
       } catch (error) {
-        console.log(error);
+        console.error("Checkout success error:", error);
+        setError(error.response?.data?.message || "Failed to process order");
       } finally {
         setIsProcessing(false);
       }
@@ -35,7 +41,7 @@ function PurchaseSuccessPage() {
       setIsProcessing(false);
       setError("No session ID found in the URL");
     }
-  }, [clearCart])
+  }, [dispatch])
   
   // const sessionId = new URLSearchParams(window.location.search).get("session_id");
   // console.log(sessionId);
