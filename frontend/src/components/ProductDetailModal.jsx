@@ -35,9 +35,9 @@ const ProductDetailModal = ({ product, isOpen, onClose, onAddToCart }) => {
 							<X size={24} />
 						</button>
 
-						<div className='flex flex-col md:flex-row h-full overflow-y-auto'>
+						<div className='flex flex-col md:flex-row max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-emerald-500 scrollbar-track-gray-800'>
 							{/* Image Section */}
-							<div className='md:w-1/2 h-72 md:h-auto relative'>
+							<div className='md:w-1/2 h-72 md:h-auto relative flex-shrink-0'>
 								<img
 									src={product.image}
 									alt={product.name}
@@ -47,7 +47,7 @@ const ProductDetailModal = ({ product, isOpen, onClose, onAddToCart }) => {
 							</div>
 
 							{/* Info Section */}
-							<div className='md:w-1/2 p-6 md:p-10 flex flex-col'>
+							<div className='md:w-1/2 p-6 md:p-10 flex flex-col min-h-0'>
 								<div className='flex-grow'>
 									<div className='flex items-center gap-2 mb-3'>
 										<span className='bg-emerald-500/10 text-emerald-400 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/20 uppercase tracking-widest'>
@@ -65,7 +65,7 @@ const ProductDetailModal = ({ product, isOpen, onClose, onAddToCart }) => {
 
 									<div className='space-y-6 mb-10'>
 										<div className='flex items-start gap-4'>
-											<div className='p-2 rounded-lg bg-emerald-500/10'>
+											<div className='p-2 rounded-lg bg-emerald-500/10 flex-shrink-0'>
 												<Info size={20} className='text-emerald-400' />
 											</div>
 											<div>
@@ -77,7 +77,7 @@ const ProductDetailModal = ({ product, isOpen, onClose, onAddToCart }) => {
 										</div>
 										
 										<div className='flex items-start gap-4'>
-											<div className='p-2 rounded-lg bg-emerald-500/10'>
+											<div className='p-2 rounded-lg bg-emerald-500/10 flex-shrink-0'>
 												<Tag size={20} className='text-emerald-400' />
 											</div>
 											<div>
@@ -89,7 +89,7 @@ const ProductDetailModal = ({ product, isOpen, onClose, onAddToCart }) => {
 								</div>
 
 								{/* Actions */}
-								<div className='pt-8 border-t border-gray-700/50 mt-auto'>
+								<div className='pt-8 border-t border-gray-700/50 mt-auto flex-shrink-0'>
 									<button
 										onClick={(e) => {
 											e.stopPropagation();
