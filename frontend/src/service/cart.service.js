@@ -5,6 +5,11 @@ export const getCoupon = async () => {
     return res.data;
 }
 
+export const getInstantRewardService = async () => {
+    const res = await axios.get("/coupons/instant-reward");
+    return res.data;
+}
+
 export const validateCoupon = async (code) => {
     const res = await axios.post("/coupons/validate", { code });
     return res.data
@@ -34,6 +39,10 @@ export const addProductToCart = async (product) => {
 
 export const deleteFromCart = async (productId) => {
     await axios.delete(`/cart`, { data: { productId } });
+}
+
+export const clearCartService = async () => {
+    await axios.delete("/cart", { data: {} });
 }
 
 export const updateProductQuantity = async (productId, quantity) => {

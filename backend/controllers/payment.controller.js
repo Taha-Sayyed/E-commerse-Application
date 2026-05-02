@@ -1,4 +1,4 @@
-import { createStripeCheckoutSessionService, createNewCoupon, retrieveStripeCheckoutSession, updateCoupon, createNewOrder, saveNewOrder } from "../service/payment.service.js"
+import { createStripeCheckoutSessionService, createNewCoupon, retrieveStripeCheckoutSession, updateCoupon, createNewOrder, saveNewOrder, findOrderBySessionId } from "../service/payment.service.js"
 import { validateCouponService } from "../service/coupon.service.js"
 import { AppError } from "../lib/appError.js"
 
@@ -32,7 +32,10 @@ export const createCheckoutSession = async (req, res) => {
 
         let coupon = null;
 
-        if (couponCode && totalAmount >= 20000) {
+        if (couponCode) {
+            if (totalAmount < 20000) {
+                return res.status(400).json({ error: "Coupons require a minimum purchase of $200." });
+            }
             coupon = await validateCouponService(req.user._id, couponCode);
             if (coupon) {
                 totalAmount -= Math.round((totalAmount * coupon.discountPercentage) / 100);
@@ -41,9 +44,7 @@ export const createCheckoutSession = async (req, res) => {
 
         const session = await createStripeCheckoutSessionService(lineItems, req.user._id, coupon, couponCode, products)
 
-        if (totalAmount >= 20000) {
-            await createNewCoupon(req.user._id);
-        }
+
 
         res.status(200).json({ id: session.id, totalAmount: totalAmount / 100 });
 
@@ -58,6 +59,20 @@ export const createCheckoutSession = async (req, res) => {
 export const checkoutSuccess = async (req, res) => {
     try {
         const { sessionId } = req.body
+
+        if (!sessionId) {
+            return res.status(400).json({ message: "Session ID is required" });
+        }
+
+        const existingOrder = await findOrderBySessionId(sessionId);
+        if (existingOrder) {
+            return res.status(200).json({
+                success: true,
+                message: "Order already processed",
+                orderId: existingOrder._id,
+            });
+        }
+
         const session = await retrieveStripeCheckoutSession(sessionId)
 
         if (session.payment_status !== "paid") {
@@ -82,9 +97,10 @@ export const checkoutSuccess = async (req, res) => {
 
 
     } catch (error) {
+        console.error("Error in checkout-success:", error);
         if (error instanceof AppError) {
             return res.status(error.statusCode).json({ message: error.message });
         }
-        return res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error", error: error.message });
     }
-}
+}

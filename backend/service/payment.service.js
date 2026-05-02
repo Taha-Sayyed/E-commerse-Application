@@ -108,10 +108,13 @@ export const createStripeCheckoutSessionService = async (lineItems, userId, coup
 }
 
 export const retrieveStripeCheckoutSession = async (sessionId) => {
+    if (!sessionId) {
+        throw new AppError("Session ID is required", 400);
+    }
     try {
         return await stripe.checkout.sessions.retrieve(sessionId)
     } catch (error) {
-        throw new AppError("Failed to retrieve stripe checkout session", 500)
+        throw new AppError(`Failed to retrieve stripe checkout session: ${error.message}`, 500)
     }
 }
 
@@ -131,6 +134,14 @@ export const updateCoupon = async (code, userId) => {
     }
 }
 
+export const findOrderBySessionId = async (sessionId) => {
+    try {
+        return await Order.findOne({ stripeSessionId: sessionId });
+    } catch (error) {
+        throw new AppError("Failed to find order", 500);
+    }
+}
+
 export const createNewOrder = async (user, products, totalAmount, sessionId) => {
     try {
         const newOrder = new Order({
@@ -145,7 +156,7 @@ export const createNewOrder = async (user, products, totalAmount, sessionId) => 
         });
         return newOrder;
     } catch (error) {
-        throw new AppError("Failed to create new order", 500)
+        throw new AppError(`Failed to create new order: ${error.message}`, 500)
     }
 }
 
@@ -153,6 +164,11 @@ export const saveNewOrder = async (newOrder) => {
     try {
         await newOrder.save();
     } catch (error) {
-        throw new AppError("Failed to save new order", 500)
+        if (error.code === 11000) {
+            // This happens if the order was already saved by a concurrent request
+            console.log("Order already exists (duplicate key), ignoring error.");
+            return;
+        }
+        throw new AppError(`Failed to save new order: ${error.message}`, 500)
     }
 }
