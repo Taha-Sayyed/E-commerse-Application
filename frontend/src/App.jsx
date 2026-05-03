@@ -1,121 +1,95 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React, { useState, useEffect } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
+import { checkAuth } from './features/auth/authSlice.js'
+
+import HomePage from "./pages/HomePage";
+import SignUpPage from "./pages/SignUpPage";
+import LoginPage from "./pages/LoginPage";
+import AdminPage from "./pages/AdminPage";
+import CategoryPage from "./pages/CategoryPage";
+import CartPage from "./pages/CartPage.jsx"
+import PurchaseSuccessPage from "./pages/PurchaseSuccessPage.jsx"
+import PurchaseCancelPage from "./pages/PurchaseCancelPage.jsx"
+
+import LoadingSpinner from "./components/LoadingSpinner";
+import Navbar from "./components/Navbar";
+import { Toaster } from "react-hot-toast";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user)
+  const checkingAuth = useSelector((state) => state.auth.checkingAuth)
+
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch]);
+
+  /** Pending Work 👈
+   * 	useEffect(() => {
+    if (!user) return;
+
+    getCartItems();
+  }, [getCartItems, user]);
+   * 
+   */
+
+  if (checkingAuth) return <LoadingSpinner />
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className='min-h-screen bg-gray-900 text-white relative overflow-hidden'>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      {/* Background gradient */}
+      <div className='absolute inset-0 overflow-hidden'>
+        <div className='absolute inset-0'>
+          <div className='absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.3)_0%,rgba(10,80,60,0.2)_45%,rgba(0,0,0,0.1)_100%)]' />
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      <div className='relative z-50 pt-20'>
+        <Navbar />
+        <Routes>
+          <Route path='/' element={<HomePage />} />
+
+          <Route
+            path='/signup'
+            element={!user ? <SignUpPage /> : <Navigate to='/' />}
+          />
+
+          <Route
+            path='/login'
+            element={!user ? <LoginPage /> : <Navigate to='/' />}
+          />
+
+          <Route
+            path='/secret-dashboard'
+            element={user?.role === "admin" ? <AdminPage /> : <Navigate to='/login' />}
+          />
+
+          <Route
+            path='/category/:category'
+            element={<CategoryPage />}
+          />
+
+          <Route
+            path='/cart'
+            element={user ? <CartPage /> : <Navigate to='/login' />}
+          />
+
+          <Route
+            path='/purchase-success'
+            element={user ? <PurchaseSuccessPage /> : <Navigate to='/login' />}
+          />
+
+          <Route
+            path='/purchase-cancel'
+            element={user ? <PurchaseCancelPage /> : <Navigate to='/login' />}
+          />
+
+        </Routes>
+      </div>
+      <Toaster />
+    </div>
   )
 }
 

@@ -1,0 +1,105 @@
+import { getCouponService, validateCouponService, saveCoupon } from "../service/coupon.service.js"
+import { createNewCoupon } from "../service/payment.service.js"
+import { AppError } from "../lib/appError.js"
+import Coupon from "../models/coupon.model.js"
+
+export const getCoupon = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        const userId = req.user._id
+        const coupon = await getCouponService(userId)
+        res.json(coupon || null)
+
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+
+export const validateCoupon = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        const userId = req.user._id
+        const { code } = req.body
+
+        const coupon = await validateCouponService(userId, code);
+
+        if (!coupon) {
+            return res.status(404).json({
+                message: "Coupon not found"
+            })
+        }
+
+        if (coupon.expirationDate < new Date()) {
+            coupon.isActive = false
+            await saveCoupon(coupon);
+            return res.status(404).json({
+                message: "Coupon Expired"
+            })
+        }
+
+        res.json({
+            message:"Coupon is Valid",
+            code:coupon.code,
+            discountPercentage:coupon.discountPercentage
+        })
+
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+
+export const getInstantReward = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        
+        // Ensure user doesn't already have an active coupon
+        const existingCoupon = await getCouponService(req.user._id);
+        if (existingCoupon) {
+            return res.json(existingCoupon);
+        }
+
+        // Create a new coupon
+        const newCoupon = await createNewCoupon(req.user._id);
+        res.status(201).json(newCoupon);
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+
+export const createCoupon = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        const { code, discountPercentage, expirationDate } = req.body;
+        
+        const coupon = new Coupon({
+            code,
+            discountPercentage,
+            expirationDate,
+            isActive: true,
+            userId: req.user._id,
+        });
+        
+        const savedCoupon = await saveCoupon(coupon);
+        res.status(201).json(savedCoupon);
+    } catch (error) {
+        res.status(500).json({ message: "Failed to create coupon" });
+        // res.status(500).json({ message: error.message });
+    }
+}
