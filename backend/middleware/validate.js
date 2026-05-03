@@ -1,5 +1,5 @@
-export const validate = (schema) => (req, res, next) => {
-    const { error, value } = schema.validate(req.body, {
+export const validate = (schema, property = "body") => (req, res, next) => {
+    const { error, value } = schema.validate(req[property], {
         abortEarly: false,
         allowUnknown: false,   // 🔥 blocks extra fields (VERY IMPORTANT)
         stripUnknown: true,    // removes unwanted fields
@@ -11,7 +11,6 @@ export const validate = (schema) => (req, res, next) => {
         });
     }
 
-    req.body = value; // sanitized
+    req[property] = value; // sanitized
     next();
-
 }
