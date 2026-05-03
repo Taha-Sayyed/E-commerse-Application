@@ -43,7 +43,7 @@ function OrderSummary() {
 
       const res = await axios.post("/payments/create-checkout-session", {
         products: cart,
-        couponCode: coupon ? coupon.code : null,
+        couponCode: isCouponApplied && coupon ? coupon.code : null,
       });
 
       const session = res.data;
