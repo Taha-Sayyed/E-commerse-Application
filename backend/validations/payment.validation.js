@@ -13,7 +13,7 @@ const productSchema = Joi.object({
 export const createCheckoutSchema = Joi.object({
   products: Joi.array().items(productSchema).min(1).required(),
 
-  couponCode: Joi.string().alphanum().min(3).max(20).optional(),
+  couponCode: Joi.string().alphanum().min(3).max(20).optional().allow(null, ""),
 });
 
 
