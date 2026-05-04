@@ -1,51 +1,14 @@
 import 'dotenv/config'
-import express from 'express'
-import { connectDB } from "../backend/lib/db.js"
+import app from './app.js'
+import { connectDB } from "./lib/db.js"
 import { ENV } from './lib/env.js'
-import cookieParser from 'cookie-parser'
-import path from "path"
 import dns from "node:dns/promises";
-import authRoutes from './routes/auth.route.js'
-import cors from "cors";
-import productRoutes from "./routes/product.route.js"
-import cartRoutes from "./routes/cart.route.js"
-import couponRoutes from "./routes/coupon.route.js"
-import paymentRoutes from "./routes/payment.route.js"
-import analyticsRoutes from "./routes/analytics.route.js"
-import { csrfErrorHandler } from "./middleware/csrf.middleware.js"
+
 dns.setServers(["1.1.1.1"]);
 
-const app = express();
 const PORT = ENV.PORT || 5000;
 
-const __dirname = path.resolve();
-
-app.use(express.json({ limit: "10mb" })); // allows you to parse the body of the request
-/**
- * It parses cookies sent by the browser
- * And adds them to req.cookies
- */
-app.use(cookieParser(ENV.COOKIE_SECRET));
-
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true,
-}));
-
-//Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/cart", cartRoutes);
-app.use("/api/coupons", couponRoutes);
-app.use("/api/payments", paymentRoutes);
-app.use("/api/analytics", analyticsRoutes);
-
-app.use(csrfErrorHandler);
-
-app.get("/api/health", (req, res) => {
-  res.status(200).json({ message: "Success" });
+app.listen(PORT, async () => {
+  console.log(`Server running on port ${PORT}`);
+  await connectDB();
 });
-app.listen(PORT, () => {
-  console.log("Server is running on port 5000 ");
-  connectDB();
-})
