@@ -12,6 +12,7 @@ import cartRoutes from "./routes/cart.route.js"
 import couponRoutes from "./routes/coupon.route.js"
 import paymentRoutes from "./routes/payment.route.js"
 import analyticsRoutes from "./routes/analytics.route.js"
+import { csrfErrorHandler } from "./middleware/csrf.middleware.js"
 dns.setServers(["1.1.1.1"]);
 
 const app = express();
@@ -24,7 +25,7 @@ app.use(express.json({ limit: "10mb" })); // allows you to parse the body of the
  * It parses cookies sent by the browser
  * And adds them to req.cookies
  */
-app.use(cookieParser());
+app.use(cookieParser(ENV.COOKIE_SECRET));
 
 app.use(cors({
   origin: "http://localhost:5173",
@@ -38,6 +39,8 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/analytics", analyticsRoutes);
+
+app.use(csrfErrorHandler);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "Success" });

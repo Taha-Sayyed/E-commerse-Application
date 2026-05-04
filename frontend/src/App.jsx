@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { checkAuth } from './features/auth/authSlice.js'
+import { initCsrf } from './lib/axios.js'
 
 import HomePage from "./pages/HomePage";
 import SignUpPage from "./pages/SignUpPage";
@@ -22,7 +23,9 @@ function App() {
   const checkingAuth = useSelector((state) => state.auth.checkingAuth)
 
   useEffect(() => {
-    dispatch(checkAuth());
+    initCsrf().then(() => {
+      dispatch(checkAuth());
+    });
   }, [dispatch]);
 
   /** Pending Work 👈

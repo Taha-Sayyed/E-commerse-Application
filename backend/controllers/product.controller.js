@@ -69,9 +69,6 @@ export const getRecommendedProducts = async (req, res) => {
 export const createProduct = async (req, res) => {
     try {
         const { name, description, price, image, category } = req.body;
-        if (!name || !description || !price || !category) {
-            return res.status(400).json({ message: "Missing required fields: name, description, price, category" });
-        }
         const product = await setProducts(name, description, price, image, category)
         res.status(201).json(product)
     }
