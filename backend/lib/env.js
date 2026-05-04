@@ -15,4 +15,5 @@ export const ENV = {
   STRIPE_SECRET_KEY:process.env.STRIPE_SECRET_KEY,
   CLIENT_URL:process.env.CLIENT_URL,
   COOKIE_SECRET:process.env.COOKIE_SECRET,
+  MONGO_URI_TEST:process.env.MONGO_URI_TEST
 };
