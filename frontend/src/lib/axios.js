@@ -5,6 +5,27 @@ const axiosInstance = axios.create({
 	withCredentials: true, // send cookies to the server with request
 });
 
+// Fetch CSRF token and store it
+let csrfToken = null;
+
+export const initCsrf = async () => {
+  try {
+    const { data } = await axiosInstance.get('/auth/csrf-token');
+    csrfToken = data.csrfToken;
+  } catch (error) {
+    console.error("Failed to initialize CSRF token", error);
+  }
+};
+
+// Attach token to every mutating request automatically
+axiosInstance.interceptors.request.use((config) => {
+  const mutating = ['post', 'put', 'patch', 'delete'];
+  if (csrfToken && mutating.includes(config.method)) {
+    config.headers['x-csrf-token'] = csrfToken;
+  }
+  return config;
+});
+
 //shared promise to prevent multiple refresh call
 let refreshPromise = null
 let isLoggingOut = false
