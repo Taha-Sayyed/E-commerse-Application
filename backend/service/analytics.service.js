@@ -52,7 +52,7 @@ export const getAnalyticsData = async () => {
         };
 
     } catch (error) {
-        throw AppError("Failed to get analytic data", 500);
+        throw new AppError("Failed to get analytic data", 500);
     }
 }
 
