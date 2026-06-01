@@ -47,11 +47,11 @@ app.get("/api/health", (req, res) => {
 // Serve frontend in production
 if (ENV.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
-  
-  // React Router catch-all (must be LAST)
-  app.get('*', (req, res) => {
+
+  // Express 5 catch-all syntax
+  app.get('/{*path}', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
-  });
+  })
 }
 
 export default app;
